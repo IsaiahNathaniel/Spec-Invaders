@@ -6,16 +6,21 @@ var mainState = {
     // loads game assets
     preload: function() {
         // background color
-        game.stage.backgroundColor = '#71c5cf';
+        game.stage.backgroundColor = '#1b1b18';
         // load asset
         game.load.image('player', 'assets/invader.png');    
-        // game.load.image('pipe', 'assets/.png');
+        game.load.image('baddie', 'assets/baddie.png');
+        game.load.image('projectile', 'assets/projectile.png');
+        game.load.image('spacebackground', 'assets/background.png');
     },
     
     // set up game, display sprites, etc
     create: function() {
         // set physics
         game.physics.startSystem(Phaser.Physics.ARCADE);
+        
+        //load tilesprite (aka background)
+        this.spaceSprite = game.add.tileSprite(0,0, 800, 600, 'spacebackground')
         
         // display ship
         this.player = this.game.add.sprite(400, 550, 'player');
@@ -54,17 +59,31 @@ var mainState = {
         // score keeping
         
         this.score = 0;
-        this.labelScore = game.add.text(20, 20, "0", { font: "30px Arial", fill: "#ffffff" });
+        this.scoreLabel = 'Points : ';
+        this.labelScore = game.add.text(20, 20, this.scoreLabel + this.score, { font: "20px Arial", fill: "#ffffff" });
         
-        
-        
-        //this.timer = game.time.events.loop(1500, this.hjsdala, this);
+        // timer variable set to 0, this is to ensure we dont shoot too fast, so I will fully explain how this works when i use it
          
+        this.checkFireRate = 0;
+        
+        // variable to make the program easier to read, changing velocity of the projectile according to players current velocity
+        
+        this.projectileVelocity = this.player.body.velocity.x;
+        
     },
     
     // called 60 times per second contains games logic
     update: function() {
     
+        // background movement
+        this.spaceSprite.tilePosition.y -= 2;
+        
+        // collision detection
+        
+        this.game.physics.arcade.overlap(this.projectiles, this.baddies, this.projectileCollisionEvent, null, this)
+        
+        
+        
         // constantly sets velocity to 0, needed because we used velocity changes as our method of movement, this makes it so the player doesn't keep sliding in one direction
         this.player.body.velocity.setTo(0,0);
         
@@ -78,7 +97,7 @@ var mainState = {
         
         // basically says if space key is pressed then run the shootProjectile function
         if (this.fireProjectile.isDown){
-            shootProjectile();
+            this.shootProjectile();
         }
                                                   
         if (this.baddies.x > 0 && this.baddies.x < 20) {
@@ -93,7 +112,44 @@ var mainState = {
             
         }
         
-        console.log(this.baddies.y)
+        if (this.baddies.y == 360) {
+            this.game.input.onTap.addOnce(this.restartGame, this);
+            this.loseText = 'Bummer, you lost! \n Click the screen to continue!'
+            this.loseDisplay = game.add.text(250, 250, this.loseText, { font: "30px Arial", fill: "#ffffff" });
+        }
+        
+        if (this.baddies.countLiving() == 0) {
+            this.game.input.onTap.addOnce(this.restartGame, this);
+            this.winText = 'Congrats, you won! \n Click the screen to continue!'
+            this.wonDisplay = game.add.text(250, 250, this.winText, { font: "30px Arial", fill: "#ffffff" });
+
+
+        }
+        
+        // console.log(this.baddies.y)
+        
+    },
+    
+    // to best explain this, i will simply speak as if i am the program.
+    // if the game time is more than the last time we fired plus 400 milliseconds then create a new projectile from our group, grab the first one that isn't being used from our pool of bullets ( we do this to save processing space )
+    // if this new projectile is spawned and is true then set its location to the player, give it a velocity of -400 to propel it upwards, set its x velocity to half of the players, then set the checkFireRate variable to the game time plus 400 milliseconds so the bullet cannot be shot again until the game clock reaches that moment.
+    
+    shootProjectile: function() {
+        
+        if (this.game.time.now > this.checkFireRate) {
+            
+            this.newProjectile = this.projectiles.getFirstExists(false);
+            
+            if (this.newProjectile) {
+                
+                this.newProjectile.reset(this.player.x, this.player.y - 20);
+                this.newProjectile.body.velocity.y = -400;
+                this.newProjectile.body.velocity.x = (this.player.body.velocity.x / 2);
+                this.checkFireRate = this.game.time.now + 600;
+                
+            }
+            
+        }
         
     },
     
@@ -101,7 +157,7 @@ var mainState = {
         // add an array of sorts of baddies
         for (var y = 0; y < 4; y++) {
             for (var x = 0; x < 6; x++){
-                this.baddies.create(x * 90,y * 50, 'invader');
+                this.baddies.create(x * 90,y * 50, 'baddie');
             }
         }
         
@@ -124,7 +180,7 @@ var mainState = {
     
     baddiesMoveDown: function() {
         
-        this.baddies.y += 5;
+        this.baddies.y += 10;
         
     },
         
@@ -137,6 +193,21 @@ var mainState = {
     baddiesMoveLeft: function() {
         
         // reserved method for future use (maybe)
+        
+    },
+    
+    // function called if a projectile and baddie collide
+    projectileCollisionEvent: function(projectileCol, baddieCol) {
+        
+        // First lets increase the score.
+        this.score += 1;
+        
+        this.labelScore.text = this.scoreLabel + this.score;
+        
+        // Let's get rid of both the bullet and the alien that was hit
+        projectileCol.kill();
+        baddieCol.kill();
+        
         
     },
     
