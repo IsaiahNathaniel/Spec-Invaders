@@ -143,6 +143,7 @@ var mainState = {
         this.player = this.game.add.sprite(400, 550, 'player');
         game.physics.arcade.enable(this.player)
         this.player.anchor.setTo(0.5, 0.5); // where the "middle" of the player is
+        this.player.collideWorldBounds=true;
       
         // creating the enemies in a group
         this.baddies = game.add.group(); 
@@ -467,6 +468,7 @@ var mediumState = {
         this.player = this.game.add.sprite(400, 550, 'player');
         game.physics.arcade.enable(this.player)
         this.player.anchor.setTo(0.5, 0.5); // where the "middle" of the player is
+        this.player.collideWorldBounds=true;
       
         // creating the enemies in a group
         this.baddies = game.add.group(); 
@@ -790,6 +792,7 @@ var hardState = {
         this.player = this.game.add.sprite(400, 550, 'player');
         game.physics.arcade.enable(this.player)
         this.player.anchor.setTo(0.5, 0.5); // where the "middle" of the player is
+        this.player.collideWorldBounds=true;
       
         // creating the enemies in a group
         this.baddies = game.add.group(); 
