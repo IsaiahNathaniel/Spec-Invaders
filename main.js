@@ -965,7 +965,7 @@ var hardState = {
             
             this.random = game.rnd.integerInRange(0, 800);
             
-            this.randomSec = game.rnd.integerInRange(0, 200)
+            this.randomSec = game.rnd.integerInRange(0, 600)
             
             this.newRocket.reset(this.random, 10);
             
