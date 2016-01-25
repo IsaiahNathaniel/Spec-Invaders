@@ -857,6 +857,9 @@ var hardState = {
     
     // called 60 times per second contains games logic
     update: function() {
+        
+        
+        this.rocketCall = game.add.text(200, 20, this.randomSec, { font: "20px Arial", fill: "#ffffff" });
     
         // background movement
         this.spaceSprite.tilePosition.y -= 3;
@@ -962,7 +965,7 @@ var hardState = {
             
             this.random = game.rnd.integerInRange(0, 800);
             
-            this.randomSec = game.rnd.integerInRange(0, 600)
+            this.randomSec = game.rnd.integerInRange(0, 200)
             
             this.newRocket.reset(this.random, 10);
             
